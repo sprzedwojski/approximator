@@ -9,5 +9,5 @@ public class Data {
 	
 	public static final double alpha			= 1.5;
 	
-	public static final String workspacePath 	= "/home/szymon/Dropbox/Workspaces/windows/Approximator3";
+	public static final String workspacePath 	= "/home/szymon/Dropbox/Workspaces/windows/approximator-github/approximator/";
 }

@@ -4,7 +4,7 @@ public class Approximator {
 		DataReader dr = new DataReader("res//in" + Data.taskNo + ".txt");
 		dr.readData();
 		
-		int order = 7;
+		int order = 10;
 		
 		Plotter plotter = new Plotter();
 		Plotter plotterQ = new Plotter();
