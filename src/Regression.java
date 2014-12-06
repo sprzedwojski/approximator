@@ -1,5 +1,5 @@
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,16 +7,19 @@ import java.util.List;
 public class Regression {
 
 	private double[] p;
-	private double[][] points;
-	private double[] cpoints;
-	private List<Double> Q;
+	private double[][] points, pointsVal;
+	private double[] cpoints, cpointsVal;
+	private List<Double> Q, QVal;
 	private int order;
 	private double[] Qder;
 	
-	public Regression(double[][] points, double[] cpoints, int order) {
+	public Regression(double[][] points, double[] cpoints, double[][] pointsVal, double[] cpointsVal, int order) {
 		Q = new ArrayList<Double>();
+		QVal = new ArrayList<Double>();
 		this.points = points;
 		this.cpoints = cpoints;
+		this.pointsVal = pointsVal;
+		this.cpointsVal = cpointsVal;
 		this.order = order;
 		p = new double[order+1];
 		Qder = new double[order+1];
@@ -37,6 +40,7 @@ public class Regression {
 
 		for(int i=0; i<1000; i++) {
 			Q.add(calculateQ());
+			QVal.add(calculateQVal());
 			
 			recalculateParameters();
 		} 
@@ -65,6 +69,25 @@ public class Regression {
 		
 		return sum / (2*points.length);
 	}
+	
+	private double calculateQVal() {
+		double sum = 0.0;
+		
+		for(int i=0; i<pointsVal.length; i++) {
+			
+			double temp = 0.0;
+			
+			for(int j=0; j<=order; j++) {
+				temp += Math.pow(cpointsVal[i], j) * p[j];
+			}
+			temp -= pointsVal[i][1];
+			
+			sum += Math.pow(temp, 2);
+			
+		}
+		
+		return sum / (2*pointsVal.length);
+	}	
 	
 	/**
 	 * Method calculating the value of the derivative of Q with respect to the given parameter.
@@ -110,19 +133,63 @@ public class Regression {
 		return qpoints;
 	}
 	
-	public void saveQToFile(int index) {
+	public double[][] getQVal() {
+		double[][] qpointsVal = new double[QVal.size()][2];
+		
+		for(int i=0; i<qpointsVal.length; i++) {
+			qpointsVal[i][0] = i;
+			qpointsVal[i][1] = QVal.get(i);
+		}
+		
+		return qpointsVal;
+	}	
+	
+	public void saveAvgQToFile(int order) {
+		FileWriter out;
 		try {
-			PrintWriter out = new PrintWriter("res//q" + Data.taskNo + "_" + index + ".dat");
+			out = new FileWriter("res//q" + Data.taskNo + ".dat", true);
+
+			double avgQ = 0.0;
+			double sum = 0.0;
 			
 			for(int i=0; i<Q.size(); i++) {			
-				out.println(i + " " + Q.get(i));
+				sum += Q.get(i);
 			}
+			avgQ = sum / Q.size();
 			
+			out.append(order + " " + avgQ + "\n");
 			out.close();
-			
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
+	}	
+	
+	public void saveAvgQValToFile(int order) {
+		FileWriter out;
+		try {
+			out = new FileWriter("res//qVal" + Data.taskNo + ".dat", true);
+
+			double avgQVal = 0.0;
+			double sum = 0.0;
+			
+			for(int i=0; i<QVal.size(); i++) {			
+				sum += QVal.get(i);
+			}
+			avgQVal = sum / QVal.size();
+			
+			if(avgQVal < Data.minAvgQVal[1]) {
+				Data.minAvgQVal[0] = order;
+				Data.minAvgQVal[1] = avgQVal;
+				
+				System.out.println("MinAvgQVal: " + avgQVal + " | order: " + order);
+			} 
+			
+			out.append(order + " " + avgQVal + "\n");
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+			
+	}	
 	
 }

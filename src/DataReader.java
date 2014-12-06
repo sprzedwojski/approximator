@@ -32,11 +32,11 @@ public class DataReader {
 	/**
 	 * Method reading the data from a given file and saving them to the appropriate variables.
 	 */
-	public void readData() {
+	public void readData(String fileType) {
 		
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(file));
-			PrintWriter out = new PrintWriter("res//in" + Data.taskNo + ".dat");
+			PrintWriter out = new PrintWriter("res/" + fileType + Data.taskNo + ".dat");
 			String line;
 			int lineIndex = 0;
 			while ((line = br.readLine()) != null) {

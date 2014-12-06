@@ -4,14 +4,33 @@ import java.io.InputStreamReader;
 
 
 public class Plotter {
+	String command = "";
+	String qcommand = "";
+	
+	public Plotter(String title, boolean trainingPoints, boolean validationPoints) {
+		if(title != null) {
+			command += "set title \"" + title + "\"; ";
+		}
+		command += "plot ";
+		if(trainingPoints) {
+			command += "'" + Data.workspacePath + "/res/" + "train" + Data.taskNo + ".dat' using 1:2 title 'Training points'";
+		}
+		if(validationPoints) {
+			command += ", '" + Data.workspacePath + "/res/" + "validation" + Data.taskNo + ".dat' using 1:2 title 'Validation points'";
+		}
+		
+	}
+	
+	public Plotter(String title) {
+		if(title != null) {
+			qcommand += "set title \"" + title + "\"; ";
+		}
+	}
 	
 	public String getRescaledValueOfX() {
 		return "((" + (Data.xNormalizedEnd - Data.xNormalizedStart) +" * (x -(" + Data.xStart + "))) / (" + (Data.xEnd - Data.xStart) + ") +(" + Data.xNormalizedStart + "))";
 	}
 	
-	String command = "plot '" + Data.workspacePath + "/res/in" + Data.taskNo + ".dat' using 1:2 title 'Points'";
-	
-	String qcommand = "";
 	
 	public void addFunctionToCommand(double[] p) {
 		String function = "";
@@ -23,12 +42,11 @@ public class Plotter {
 		command += ",  " + function + " title 'x^" + (p.length-1) + "'";
 	}
 	
-	public void addQToCommand(int order) {
-		qcommand = "plot ";
-		for(int i=1; i<=order; i++) {
-			qcommand += "'" + Data.workspacePath + "/res/q" + Data.taskNo + "_" + i + ".dat' using 1:2 w lines title 'Q " + i + "'";
-			if(i!=order)	qcommand+= ",  ";
-		}
+	public void addQToCommand() {
+		qcommand += "plot ";
+		qcommand += "'" + Data.workspacePath + "/res/q" + Data.taskNo + ".dat' using 1:2 w points title 'Q training',"
+				+ "'" + Data.workspacePath + "/res/qVal" + Data.taskNo + ".dat' using 1:2 w points title 'Q validation'";
+		qcommand+= ",  ";
 	}
 	
 	public void gnuplot(final String com) {
