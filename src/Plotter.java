@@ -32,17 +32,26 @@ public class Plotter {
 	}
 	
 	
-	public void addFunctionToCommand(double[] p) {
+	public void addFunctionToCommand(double[] p, double lambda) {
 		String function = "";
 		for(int i=p.length-1; i>0; i--) {
 			function += p[i] + "*" + getRescaledValueOfX() + "**" + i + " + ";
 		}
 		function += p[0];
 		
-		command += ",  " + function + " title 'x^" + (p.length-1) + "'";
+		command += ",  " + function + " title 'lambda " + lambda + "'";
 	}
 	
 	public void addQToCommand() {
+//		qcommand += "set xtics ( \"10^-6\" 0, \"10^-5\" 1, \"10^-4\" 2, \"10^-3\" 3,"
+//				+ " \"10^-2\" 4, \"10^-1\" 5, \"10^0\" 6, \"10^1\" 7,"
+//				+ "\"10^2\" 8, \"10^3\" 9, \"10^4\" 10);";
+//		qcommand += "set xtics 5; set format x '%';";		
+		
+//		qcommand += "set xtics ( \"10^-6\" 0, \"10^-4\" 2,"
+//		+ " \"10^-2\" 4, \"10^0\" 6,"
+//		+ " \"10^2\" 8, \"10^4\" 10);";
+		
 		qcommand += "plot ";
 		qcommand += "'" + Data.workspacePath + "/res/q" + Data.taskNo + ".dat' using 1:2 w points title 'Q training',"
 				+ "'" + Data.workspacePath + "/res/qVal" + Data.taskNo + ".dat' using 1:2 w points title 'Q validation'";

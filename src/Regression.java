@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
+
 
 public class Regression {
 
@@ -12,8 +14,9 @@ public class Regression {
 	private List<Double> Q, QVal;
 	private int order;
 	private double[] Qder;
+	private double lambda;
 	
-	public Regression(double[][] points, double[] cpoints, double[][] pointsVal, double[] cpointsVal, int order) {
+	public Regression(double[][] points, double[] cpoints, double[][] pointsVal, double[] cpointsVal, int order, double lambda) {
 		Q = new ArrayList<Double>();
 		QVal = new ArrayList<Double>();
 		this.points = points;
@@ -23,6 +26,7 @@ public class Regression {
 		this.order = order;
 		p = new double[order+1];
 		Qder = new double[order+1];
+		this.lambda = lambda;
 		
 		initp();
 	}
@@ -38,13 +42,12 @@ public class Regression {
 	 */
 	public void doRegression() {
 
-		for(int i=0; i<1000; i++) {
+		for(int i=0; i<Data.iterations; i++) {
 			Q.add(calculateQ());
 			QVal.add(calculateQVal());
 			
 			recalculateParameters();
-		} 
-		
+		}		
 	}
 	
 	/**
@@ -67,7 +70,15 @@ public class Regression {
 			
 		}
 		
-		return sum / (2*points.length);
+		sum = sum / (2*points.length);
+		
+		double punishment = 0.0;
+		for(int i=1; i<p.length; i++) { // omit p0
+			punishment += Math.pow(p[i], 2);
+		}
+		punishment /= (2*points.length); 
+		
+		return sum + punishment * lambda;
 	}
 	
 	private double calculateQVal() {
@@ -86,7 +97,15 @@ public class Regression {
 			
 		}
 		
-		return sum / (2*pointsVal.length);
+		sum = sum / (2*pointsVal.length);
+		
+		double punishment = 0.0;
+		for(int i=1; i<p.length; i++) { // omit p0
+			punishment += Math.pow(p[i], 2);
+		}
+		punishment /= (2*pointsVal.length); 
+		
+		return sum + punishment * lambda;
 	}	
 	
 	/**
@@ -107,7 +126,11 @@ public class Regression {
 			
 		}
 		
-		Qder[which] = sum / cpoints.length;
+		sum /= cpoints.length;
+		
+		sum += lambda * p[which] / cpoints.length;
+		
+		Qder[which] = sum;
 		
 		return Qder[which];
 	}
@@ -153,10 +176,12 @@ public class Regression {
 			double sum = 0.0;
 			
 			for(int i=0; i<Q.size(); i++) {			
-				sum += Q.get(i);
+				sum += Q.get(i) / Q.size();
 			}
-			avgQ = sum / Q.size();
+//			avgQ = sum / Q.size();
+			avgQ = sum;
 			
+//			out.append(order + " " + (Double.isNaN(avgQ) ? Double.MAX_VALUE : avgQ) + "\n");
 			out.append(order + " " + avgQ + "\n");
 			out.close();
 		} catch (IOException e) {
@@ -173,17 +198,19 @@ public class Regression {
 			double sum = 0.0;
 			
 			for(int i=0; i<QVal.size(); i++) {			
-				sum += QVal.get(i);
+				sum += QVal.get(i) / QVal.size();
 			}
-			avgQVal = sum / QVal.size();
+//			avgQVal = sum / QVal.size();
+			avgQVal = sum;
 			
 			if(avgQVal < Data.minAvgQVal[1]) {
 				Data.minAvgQVal[0] = order;
 				Data.minAvgQVal[1] = avgQVal;
 				
-				System.out.println("MinAvgQVal: " + avgQVal + " | order: " + order);
+				System.out.println("MinAvgQVal: " + avgQVal + " | lambda: " + order);
 			} 
 			
+//			out.append(order + " " + (Double.isNaN(avgQVal) ? Double.MAX_VALUE : avgQVal) + "\n");
 			out.append(order + " " + avgQVal + "\n");
 			out.close();
 		} catch (IOException e) {

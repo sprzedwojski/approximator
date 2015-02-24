@@ -7,7 +7,9 @@ public class Data {
 	
 	public static final int taskNo 				= 4;
 	
-	public static final double alpha			= 1.5;
+	public static final double alpha			= 0.6;
+	
+	public static final int iterations			= 1500;
 	
 	public static final String workspacePath 	= "/home/szymon/Dropbox/Workspaces/windows/approximator-github/approximator/";
 	
